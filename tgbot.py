@@ -3,11 +3,11 @@ import requests
 import time
 import urllib
 
-TOKEN = ""
+TOKEN = "" #insert token you get from creating bot here
 URL = "https://api.telegram.org/bot{}/".format(TOKEN)
 
 
-def getUrl(url):
+def getUrl(url): 
 	response = requests.get(url)
 	content = response.content.decode("utf8")
 	return content
@@ -18,7 +18,7 @@ def jsonFromUrl(url):
 	return js
 
 
-def getUpdates(offset=None):
+def getUpdates(offset=None): 
 	url = URL + "getUpdates?timeout=100"
 	if offset:
 		url += '&offset={}'.format(offset)
