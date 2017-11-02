@@ -122,10 +122,19 @@ def getMessageType(dictionary):
         return 'text'
 
 def main():
-    last_message = getLastUpdate(getUpdates())
-    last_message_type = getMessageType(last_message)
-    if last_message_type == 'text':
-        print(watson(last_message['text']))
+	last_message_before = None
+	while True:
+		last_message = getLastUpdate(getUpdates())
+		last_message_type = getMessageType(last_message)
+		
+		if last_message != last_message_before:
+			#tämä osa suoritetaan jos tule jotain uutta.
+			"""if last_message_type == 'text':
+				print(last_message['text'])
+				print(watson(last_message['text']))
+			else:
+				print(last_message['message']['text'])"""
+		last_message_before = last_message
 
 
 if __name__ == '__main__':
