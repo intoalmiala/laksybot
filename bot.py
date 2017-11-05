@@ -9,15 +9,15 @@ import urllib
 
 os.chdir(os.environ['HOME']  + '/ibm_watson')	
 
-lxybot = telegram.Bot("salaista")
+lxybot = telegram.Bot("386957960:AAH63k5bZW3ONF4ZdDcVYdmHEXO9HhdmpQY")
 
-TOKEN = "jotain salaista" #This is for the authentication of the bot.
+TOKEN = "386957960:AAH63k5bZW3ONF4ZdDcVYdmHEXO9HhdmpQY" #This is for the authentication of the bot.
 URL = "https://api.telegram.org/bot{}/".format(TOKEN)
 
 def watson(text): #This function deternies, which school subject is being talked about in the input string.
     natural_language_classifier = NaturalLanguageClassifierV1(
         username='5b314083-6286-4ad6-86b0-c6d0ea4aa266',
-        password='jotain tosi salaista')
+        password='mawh434bmDVG')
 
     response = natural_language_classifier.classify('1e0d8ex232-nlc-26798', text)['top_class']
     return(str(response))
@@ -63,7 +63,14 @@ def lastChatIdText(updates): # Returns the last chat id that is being used in di
 	return [text, chat_id]
 	
 def lastSenderId(update):
-	return update['message']['from']['id']
+	if update['message']['chat']['type'] == 'group':
+		print('group')
+		print(update['message']['chat']['id'])
+		return update['message']['chat']['id']
+	if update['message']['chat']['type'] == 'private':
+		print('private')
+		print(update['message']['from']['id'])
+		return update['message']['from']['id']
 
 
 def sendMessage(text, chat_id): #Sends a message to a given chat_id.
