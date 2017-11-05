@@ -3,10 +3,14 @@ import requests
 import time
 import wget
 from watson_developer_cloud import NaturalLanguageClassifierV1
+import telegram
+import os
 
+os.chdir(os.environ['HOME']  + '/ibm_watson')	
 
+lxybot = telegram.Bot("386957960:AAH63k5bZW3ONF4ZdDcVYdmHEXO9HhdmpQY")
 
-TOKEN = "459820092:AAHoQ5rCgtTWWRspi6dNQKHeuB3EHBqeCqM"
+TOKEN = "386957960:AAH63k5bZW3ONF4ZdDcVYdmHEXO9HhdmpQY"
 URL = "https://api.telegram.org/bot{}/".format(TOKEN)
 
 def watson(text):
@@ -24,8 +28,8 @@ def getUrl(url):
     return content
 
 
-def downloadUrl(url):
-    wget.download(url,out='asd.jpg')
+def downloadUrl(url, name):
+    wget.download(url,out=name)
     print('\n')
 
 
@@ -37,7 +41,7 @@ def jsonFromUrl(url):
 
 
 def getUpdates(offset=None):
-	url = URL + "getUpdates?timeout=100"
+	url = URL + "getUpdates?timeout=100&alllowed_updates=['message']"
 	if offset:
 		url += '&offset={}'.format(offset)
 	js = jsonFromUrl(url)
@@ -47,9 +51,15 @@ def getUpdates(offset=None):
 def lastChatIdText(updates):
 	num_updates = len(updates["result"])
 	last_update = num_updates - 1
-	text = updates["result"][last_update]["message"]["text"]
+	try:
+		text = updates["result"][last_update]["message"]["text"]
+	except:
+		try:
+			text = updates["result"][last_update]["message"]["edited_text"]
+		except:
+			raise Exception('Ei ole viesti')
 	chat_id = updates["result"][last_update]["message"]["chat"]["id"]
-	return (text, chat_id)
+	return [text, chat_id]
 
 
 def sendMessage(text, chat_id):
@@ -65,12 +75,14 @@ def getLastUpdateId(updates):
     return max(update_ids)
 
 def getLastUpdate(updates):
-    update_ids = []
-    for update in updates["result"]:
-        update_ids.append(int(update["update_id"]))
-    for i in updates['result']:
-        if i['update_id'] == max(update_ids):
-            return i
+	update_ids = []
+	if len(updates['result']) == 0:
+		raise Exception('No messages yet')
+	for update in updates["result"]:
+		update_ids.append(int(update["update_id"]))
+	for i in updates['result']:
+		if i['update_id'] == max(update_ids):
+			return i
 
 
 
@@ -83,9 +95,10 @@ def echoAll(updates):
 
 
 
-def getFile(file_id):
-    json = jsonFromUrl(URL + 'getFile?file_id={}'.format(file_id))
-    downloadUrl('https://api.telegram.org/file/bot{}/{}'.format(TOKEN, json['result']['file_path']))
+def getFile(file_id, path):
+	json = jsonFromUrl(URL + 'getFile?file_id={}'.format(file_id))
+	url = 'https://api.telegram.org/file/bot{}/{}'.format( TOKEN, json['result']['file_path'])
+	downloadUrl(url, path)
 
 
 def getFileId(resolution):
@@ -121,22 +134,79 @@ def getMessageType(dictionary):
     elif 'text' in dictionary:
         return 'text'
 
+def sendImage(chat_id, path, caption=''):
+	lxybot.send_photo(chat_id=chat_id, photo=open(path, 'rb'), caption=caption)
+	
+def getChatTitle(update):
+	if update['message']['chat']['type'] == 'group':
+		print(update['message']['chat']['type'])
+		print(update)
+		return update['message']['chat']['title']
+	elif update['message']['chat']['type'] == 'private':
+		print(update['message']['chat']['type'])
+		print(update)
+		return update['message']['chat']['first_name']
+	else:
+		print('virhe')
+	
+	
+	
+
 def main():
 	last_message_before = None
 	while True:
+		#print(getUpdates())
 		last_message = getLastUpdate(getUpdates())
-		last_message_type = getMessageType(last_message)
+		try:
+			last_message_type = getMessageType(last_message['message'])
+			last_message_content = last_message['message']
+		except KeyError:
+			try:
+				last_message_type = getMessageType(last_message['edited_message'])
+				last_message_content = last_message['edited_message']
+			except:
+				raise Exception('Ei ole viesti')
+		#print(getChatTitle())
 		
-		if last_message != last_message_before:
-			#tämä osa suoritetaan jos tule jotain uutta.
-			"""if last_message_type == 'text':
-				print(last_message['text'])
-				print(watson(last_message['text']))
-			else:
-				print(last_message['message']['text'])"""
+		"""print(getLastUpdate(getUpdates()))
+		print(last_message_content['text']ts)"""
+
+		if last_message != last_message_before: 
+			print('Uusi viesti:')
+			last_title = getChatTitle(last_message)
+			print(last_title)
+			if last_message_type == 'text' and'@' in last_message_content['text']:
+				print(last_message_content['text'])
+				chat_id = lastChatIdText(getUpdates())[1]
+				kouluaine = watson(last_message_content['text'])
+				print(last_title)
+				path = os.environ['HOME'] + '/ibm_watson/{}/{}.jpg'.format(last_title, kouluaine)
+				print(path)
+				print(kouluaine)
+				sendImage(chat_id, path, 'olepahyvä')
+				print(watson(last_message_content['text']))
+				
+			elif last_message_type == 'caption' and '@' in last_message_content['caption']: 
+				caption = last_message['message']['caption']
+				print(caption)
+				kouluaine = watson(caption)
+				print(not os.path.isdir('./{}'.format(last_title)))
+				print(os.path.isfile('{}/{}.jpg'.format(last_title, kouluaine)))
+				if not os.path.isdir('./{}'.format(last_title)):
+					os.mkdir('./{}'.format(last_title))
+				if os.path.isfile('{}/{}.jpg'.format(last_title, kouluaine)):
+					os.remove('{}/{}.jpg'.format(last_title, kouluaine))
+				getFile(getFileId(1), './{}/{}.jpg'.format(last_title, kouluaine))
 		last_message_before = last_message
+	print(last_message)
+	print('text' in last_message['message'])
+	#print(lastChatIdText(getUpdates()))
+	#print(lastChatIdText(getUpdates())[1])
+	#sendImage(lastChatIdText(getUpdates())[1])
+	last_message_before = last_message
+	
 
-
+	
 if __name__ == '__main__':
     main()
 
