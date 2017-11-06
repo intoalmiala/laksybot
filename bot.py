@@ -9,15 +9,15 @@ import urllib
 
 os.chdir(os.environ['HOME']  + '/ibm_watson')	
 
-lxybot = telegram.Bot("386957960:AAH63k5bZW3ONF4ZdDcVYdmHEXO9HhdmpQY")
+lxybot = telegram.Bot("something really secret")
 
-TOKEN = "386957960:AAH63k5bZW3ONF4ZdDcVYdmHEXO9HhdmpQY" #This is for the authentication of the bot.
+TOKEN = "something really secret" #This is for the authentication of the bot.
 URL = "https://api.telegram.org/bot{}/".format(TOKEN)
 
 def watson(text): #This function deternies, which school subject is being talked about in the input string.
     natural_language_classifier = NaturalLanguageClassifierV1(
         username='5b314083-6286-4ad6-86b0-c6d0ea4aa266',
-        password='mawh434bmDVG')
+        password='something really secret')
 
     response = natural_language_classifier.classify('1e0d8ex232-nlc-26798', text)['top_class']
     return(str(response))
