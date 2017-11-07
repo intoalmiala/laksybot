@@ -32,7 +32,6 @@ def getUrl(url): # Opens an url
 
 def downloadUrl(url, name): #Downloads the contents of the input url.
     wget.download(url,out=name)
-    print('\n')
 
 
 def jsonFromUrl(url): #Returns a json object from the contents of a given url.
@@ -75,12 +74,8 @@ def lastChatIdText(updates): # Returns the last chat id that is being used in di
     
 def lastSenderId(update):
     if update['message']['chat']['type'] == 'group':
-        print('group')
-        print(update['message']['chat']['id'])
         return update['message']['chat']['id']
     if update['message']['chat']['type'] == 'private':
-        print('private')
-        print(update['message']['from']['id'])
         return update['message']['from']['id']
 
 
@@ -107,13 +102,6 @@ def getLastUpdate(updates): # Returns the last event that is visible in the getU
         if i['update_id'] == max(update_ids):
             return i
 
-
-
-def echoAll(updates):
-    for update in updates["result"]:
-        text = update["message"]["text"]
-    chat = update["message"]["chat"]["id"]
-    sendMessage(text, chat)
 
 def getFile(file_id, path): #Downloads an image from telegram servers specified by an image id. path is the location that the image is going to be saved to.
     json = jsonFromUrl(URL + 'getFile?file_id={}'.format(file_id))
@@ -162,15 +150,11 @@ def sendImage(chat_id, path, caption=''): # Sends an image to the chat_id provid
     
 def getChatTitle(update): # Gets the last message sender, or the group name, depending whether the last message was sent in a group or a private conversation.
     if update['message']['chat']['type'] == 'group':
-        print(update['message']['chat']['type'])
-        print(update)
         return update['message']['chat']['title']
     elif update['message']['chat']['type'] == 'private':
-        print(update['message']['chat']['type'])
-        print(update)
         return update['message']['chat']['first_name']
     else:
-        print('virhe')
+        raise Exception('chatin titleä ei löytynyt')
     
     
     
@@ -178,7 +162,6 @@ def getChatTitle(update): # Gets the last message sender, or the group name, dep
 def main():
     last_message_before = None
     while True:
-        #print(getUpdates())
         last_message = getLastUpdate(getUpdates()) # The last "message" value in the getUpdates JSON object.
         try:
             last_message_type = getMessageType(last_message['message'])
@@ -189,45 +172,33 @@ def main():
                 last_message_content = last_message['edited_message']
             except:
                 raise Exception('Not a message.')
-        #print(getChatTitle())
-        #print(getLastUpdate(getUpdates()))
-        #print(last_message_content['text'])
 
         if last_message != last_message_before: # All this happens if somethig new has happened since last update.
-            print('New message')
             last_title = getChatTitle(last_message)
-            print(last_title)
             if last_message_type == 'text' and'@' in last_message_content['text']: # How text messages are treated.
-                print(last_message_content['text'])
+                print('Sain viestin:', last_message_content['text'])
                 chat_id = lastChatIdText(getUpdates())[1]
                 kouluaine = watson(last_message_content['text'])
-                print(last_title)
+                print(last_title + 'ltä')
                 path = os.environ['HOME'] + '/laksybot/ryhmät/{}/'.format(last_title)
                 if not os.path.isdir(path):
                     os.mkdir(path)
                 path += kouluaine + '.jpg'
-                print(path)
-                print(kouluaine)
-                sendImage(chat_id, path, 'olepahyvä')
-                print(watson(last_message_content['text']))
+                print(kouluaine+'\n')
+                sendImage(chat_id, path, 'Tässä on aineen {} läksy.'.format(kouluaine.lower()))
                 
             elif last_message_type == 'caption' and '@' in last_message_content['caption']: # How images are treated.
                 caption = last_message['message']['caption']
-                print(caption)
+                print('Sain kuvan, jonka käpsöni oli:', caption)
                 kouluaine = watson(caption)
-                print(not os.path.isdir('./{}'.format(last_title)))
-                print(os.path.isfile('{}/{}.jpg'.format(last_title, kouluaine)))
                 if not os.path.isdir('./{}'.format(last_title)):
                     os.mkdir('./{}'.format(last_title))
                 if os.path.isfile('{}/{}.jpg'.format(last_title, kouluaine)):
                     os.remove('{}/{}.jpg'.format(last_title, kouluaine))
                 getFile(getFileId(1), './{}/{}.jpg'.format(last_title, kouluaine))
+                print('\nKuva ladattu onnistuneesti')
+                sendMessage(chat_id, 'Selvä! Muistan nyt aineen {} läksyn!'.format(kouluaine.lower()))
         last_message_before = last_message
-    print(last_message)
-    print('text' in last_message['message'])
-    #print(lastChatIdText(getUpdates()))
-    #print(lastChatIdText(getUpdates())[1])
-    #sendImage(lastChatIdText(getUpdates())[1])
     last_message_before = last_message
     
 
