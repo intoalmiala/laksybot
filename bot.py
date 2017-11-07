@@ -7,8 +7,7 @@ import telegram
 import os
 import urllib
 
-os.chdir(os.environ['HOME']  + '/laksybot')	
-
+os.chdir(os.environ['HOME']  + '/laksybot/ryhmät')	
 
 
 
@@ -45,10 +44,13 @@ def jsonFromUrl(url): #Returns a json object from the contents of a given url.
 update_counter = 0
 
 def getUpdates(): # Returns a JSON object representing the events that occur during interacting with the bot.
+    global update_counter
     url = URL + "getUpdates?timeout=100&alllowed_updates=['message']"
     if update_counter > 90:
+        update_counter = 0
         return getUpdatesWithOffset(getLastUpdateId(getUpdatesWithOffset()))
     js = jsonFromUrl(url)
+    update_counter += 1
     return js
 
 
@@ -200,7 +202,10 @@ def main():
                 chat_id = lastChatIdText(getUpdates())[1]
                 kouluaine = watson(last_message_content['text'])
                 print(last_title)
-                path = os.environ['HOME'] + '/ibm_watson/{}/{}.jpg'.format(last_title, kouluaine)
+                path = os.environ['HOME'] + '/laksybot/ryhmät/{}/'.format(last_title)
+                if not os.path.isdir(path):
+                    os.mkdir(path)
+                path += kouluaine + '.jpg'
                 print(path)
                 print(kouluaine)
                 sendImage(chat_id, path, 'olepahyvä')
