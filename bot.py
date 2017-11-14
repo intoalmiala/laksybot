@@ -160,7 +160,7 @@ def sendImage(chat_id, path, caption=''): # Sends an image to the chat_id provid
     try:
         lxybot.send_photo(chat_id=chat_id, photo=open(path, 'rb'), caption=caption)
     except FileNotFoundError:
-        sendMessage('Et ole kertonut minulle {}n läksyjä!'.format(path), lastSenderId(getLastUpdate(getUpdates())))
+        sendMessage('En ole saanut aineen {} läksyjä :E'.format(kouluaine.lower()), lastSenderId(getLastUpdate(getUpdates())))
     
 def getChatTitle(update): # Gets the last message sender, or the group name, depending whether the last message was sent in a group or a private conversation.
     if update['message']['chat']['type'] == 'group':
@@ -201,7 +201,7 @@ def main():
                     os.mkdir(path)
                 path += kouluaine + '.jpg'
                 print(kouluaine+'\n')
-                sendImage(chat_id, path, 'Tässä on aineen {} läksy.'.format(kouluaine.lower()))
+                sendImage(chat_id, path, 'Tässä on aineen {} läksy.'.format(kouluaine.lower()), kouluaine)
             if last_message_type == 'added' and last_message['new_chat_participant']['username'] == 'lxybot':
                 sendMessage(chat_id, 'Hei, minä olen Läksybot.\nKun joku laittaa kuvan läksyistä, minä muistan sen, ja kun joku kysyy läksyjä, niin minä kerron ne.')
             
