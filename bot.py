@@ -11,20 +11,30 @@ os.chdir(os.environ['HOME']  + '/laksybot/ryhmät')
 
 
 
-TOKEN = "" #This is for the authentication of the bot.
+TOKEN = "386957960:AAEWqf1iFMjnHk7yJfqK9pHVuWiTaxQpJ1I" #This is for the authentication of the bot.
 lxybot = telegram.Bot(TOKEN)
 URL = "https://api.telegram.org/bot{}/".format(TOKEN)
+
+def getTopClassConfidence(top_class, response):
+    for i in response['classes']:
+        if i['class_name'] == top_class:
+            return i['confidence']
+
 
 def watson(text): #This function deternies, which school subject is being talked about in the input string.
     natural_language_classifier = NaturalLanguageClassifierV1(
         username='5b314083-6286-4ad6-86b0-c6d0ea4aa266',
-        password='')
+        password='mawh434bmDVG')
 
-    response = natural_language_classifier.classify('1e0d8ex232-nlc-26798', text)['top_class']
-    return(str(response))
+    response = natural_language_classifier.classify('1e0d8ex232-nlc-26798', text)
+    top_class = response['top_class']
+    if getTopClassConfidence(top_class, response) <= 0.45:
+        return None
+    else:
+        return top_class
 
 
-def getUrl(url): # Opens an url
+def getUrl(url): # Opens a url
     response = requests.get(url)
     content = response.content.decode("utf8")
     return content
@@ -141,8 +151,6 @@ def getMessageType(dictionary): # Returns the type of the last message sent.
         return 'photo'
     elif 'text' in dictionary:
         return 'text'
-    elif 'new_chat_participant' in dictionary:
-        return 'added'
 
 def sendImage(chat_id, path, caption=''): # Sends an image to the chat_id provided. Path is the location that the image is going to uploaded from. Caption is optional.
     try:
@@ -157,9 +165,6 @@ def getChatTitle(update): # Gets the last message sender, or the group name, dep
         return update['message']['chat']['first_name']
     else:
         raise Exception('chatin titleä ei löytynyt')
-
-def getChatId(update):
-    return update['message']['chat']['id']
     
     
     
@@ -177,16 +182,15 @@ def main():
                 last_message_content = last_message['edited_message']
             except:
                 raise Exception('Not a message.')
+
         if last_message != last_message_before: # All this happens if somethig new has happened since last update.
-            chat_id = lastChatIdText(getUpdates())[1]
-			last_title = getChatTitle(last_message)
-            if last_message_type == 'added' and last_message['new_chat_participant']['username'] == 'lxybot':
-                sendMessage(chat_id, 'Hei, minä olen Läksybot.\nKun joku laittaa kuvan läksyistä, minä muistan sen, ja kun joku kysyy läksyjä, niin minä kerron ne.')
-            if last_message_type == 'text' and'@' in last_message_content['text']: # How text messages are treated.
+            last_title = getChatTitle(last_message)
+            if last_message_type == 'text' and watson(last_message_content['text']) != None: # How text messages are treated.
                 print('Sain viestin:', last_message_content['text'])
+                chat_id = lastChatIdText(getUpdates())[1]
                 kouluaine = watson(last_message_content['text'])
                 print(last_title + 'ltä')
-                path = os.environ['HOME'] + '/laksybot/ryhmät/{}/'.format(chat_id)
+                path = os.environ['HOME'] + '/laksybot/ryhmät/{}/'.format(last_title)
                 if not os.path.isdir(path):
                     os.mkdir(path)
                 path += kouluaine + '.jpg'
@@ -197,11 +201,11 @@ def main():
                 caption = last_message['message']['caption']
                 print('Sain kuvan, jonka käpsöni oli:', caption)
                 kouluaine = watson(caption)
-                if not os.path.isdir('./{}'.format(chat_id)):
-                    os.mkdir('./{}'.format(chat_id))
-                if os.path.isfile('{}/{}.jpg'.format(chat_id, kouluaine)):
-                    os.remove('{}/{}.jpg'.format(chat_id, kouluaine))
-                getFile(getFileId(1), './{}/{}.jpg'.format(chat_id, kouluaine))
+                if not os.path.isdir('./{}'.format(last_title)):
+                    os.mkdir('./{}'.format(last_title))
+                if os.path.isfile('{}/{}.jpg'.format(last_title, kouluaine)):
+                    os.remove('{}/{}.jpg'.format(last_title, kouluaine))
+                getFile(getFileId(1), './{}/{}.jpg'.format(last_title, kouluaine))
                 print('\nKuva ladattu onnistuneesti')
                 sendMessage(chat_id, 'Selvä! Muistan nyt aineen {} läksyn!'.format(kouluaine.lower()))
         last_message_before = last_message
