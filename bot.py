@@ -7,6 +7,8 @@ import telegram
 import os
 import urllib
 
+if not isdir(os.environ['HOME']  + '/laksybot/ryhmät'):
+    os.mkdirs(os.environ['HOME']  + '/laksybot/ryhmät')
 os.chdir(os.environ['HOME']  + '/laksybot/ryhmät')   
 
 
