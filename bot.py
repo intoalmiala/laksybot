@@ -204,7 +204,7 @@ def main():
                     os.mkdir(path)
                 path += kouluaine + '.jpg'
                 print(kouluaine+'\n')
-                sendImage(chat_id, path, kouluaine, 'Tässä on aineen {} läksy.'.format(kouluaine.lower()))
+                sendImage(chat_id, path, kouluaine, 'Tässä on aineen {} läksy :}'.format(kouluaine.lower()))
             if last_message_type == 'added' and last_message['new_chat_participant']['username'] == 'lxybot':
                 sendMessage(chat_id, 'Hei, minä olen Läksybot.\nKun joku laittaa kuvan läksyistä, minä muistan sen, ja kun joku kysyy läksyjä, niin minä kerron ne.')
             
@@ -220,7 +220,7 @@ def main():
                     os.remove('{}/{}.jpg'.format(chat_id, kouluaine))
                 getFile(getFileId(1), './{}/{}.jpg'.format(chat_id, kouluaine))
                 print('\nKuva ladattu onnistuneesti')
-                sendMessage(chat_id, 'Selvä! Muistan nyt aineen {} läksyn!'.format(kouluaine.lower()))
+                sendMessage(chat_id, 'Selvä, muistan nyt läksyt aineesta {} :-}'.format(kouluaine.lower()))
         last_message_before = last_message
     last_message_before = last_message
     
