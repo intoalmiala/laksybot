@@ -80,7 +80,10 @@ def lastChatIdText(updates): # Returns the last chat id that is being used in di
         try:
             text = updates["result"][last_update]["message"]["edited_text"]
         except:
-            raise Exception('Ei ole viesti')
+            try:
+                text = updates["result"][last_update]["message"]["caption"]
+            except: 
+                raise Exception('Ei ole viesti')
     chat_id = updates["result"][last_update]["message"]["chat"]["id"]
     return [text, chat_id]
     
@@ -91,8 +94,8 @@ def lastSenderId(update):
         return update['message']['from']['id']
 
 
-def sendMessage(text, chat_id): #Sends a message to a given chat_id.
-    text = urllib.parse.quote_plus(text)
+def sendMessage(chat_id, text): #Sends a message to a given chat_id.
+    text = urllib.parse.quote_plus(text.encode('utf-8'))
     url = URL + "sendMessage?text={}&chat_id={}".format(text, chat_id)
     print('Lähetin viestin: {} {}:lle'.format(text, chat_id))
     getUrl(url)
@@ -206,7 +209,8 @@ def main():
                 sendMessage(chat_id, 'Hei, minä olen Läksybot.\nKun joku laittaa kuvan läksyistä, minä muistan sen, ja kun joku kysyy läksyjä, niin minä kerron ne.')
             
                 
-            elif last_message_type == 'caption' and '@' in last_message_content['caption']: # How images are treated.
+            elif last_message_type == 'caption' and watson(last_message_content['caption']) != None: # How images are treated.
+                chat_id = lastChatIdText(getUpdates())[1]
                 caption = last_message['message']['caption']
                 print('Sain kuvan, jonka käpsöni oli:', caption)
                 kouluaine = watson(caption)
