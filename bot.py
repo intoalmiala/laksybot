@@ -11,7 +11,7 @@ os.chdir(os.environ['HOME']  + '/laksybot/ryhmät')
 
 
 
-TOKEN = "386957960:AAEWqf1iFMjnHk7yJfqK9pHVuWiTaxQpJ1I" #This is for the authentication of the bot.
+TOKEN = "" #This is for the authentication of the bot.
 lxybot = telegram.Bot(TOKEN)
 URL = "https://api.telegram.org/bot{}/".format(TOKEN)
 
@@ -24,7 +24,7 @@ def getTopClassConfidence(top_class, response):
 def watson(text): #This function deternies, which school subject is being talked about in the input string.
     natural_language_classifier = NaturalLanguageClassifierV1(
         username='5b314083-6286-4ad6-86b0-c6d0ea4aa266',
-        password='mawh434bmDVG')
+        password='')
 
     response = natural_language_classifier.classify('1e0d8ex232-nlc-26798', text)
     top_class = response['top_class']
