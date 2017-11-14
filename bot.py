@@ -156,7 +156,7 @@ def getMessageType(dictionary): # Returns the type of the last message sent.
     elif 'new_chat_participant' in dictionary:
         return 'added'
 
-def sendImage(chat_id, path, caption='', kouluaine): # Sends an image to the chat_id provided. Path is the location that the image is going to uploaded from. Caption is optional.
+def sendImage(chat_id, path, kouluaine, caption=''): # Sends an image to the chat_id provided. Path is the location that the image is going to uploaded from. Caption is optional.
     try:
         lxybot.send_photo(chat_id=chat_id, photo=open(path, 'rb'), caption=caption)
     except FileNotFoundError:
@@ -201,7 +201,7 @@ def main():
                     os.mkdir(path)
                 path += kouluaine + '.jpg'
                 print(kouluaine+'\n')
-                sendImage(chat_id, path, 'Tässä on aineen {} läksy.'.format(kouluaine.lower()), kouluaine)
+                sendImage(chat_id, path, kouluaine, 'Tässä on aineen {} läksy.'.format(kouluaine.lower()))
             if last_message_type == 'added' and last_message['new_chat_participant']['username'] == 'lxybot':
                 sendMessage(chat_id, 'Hei, minä olen Läksybot.\nKun joku laittaa kuvan läksyistä, minä muistan sen, ja kun joku kysyy läksyjä, niin minä kerron ne.')
             
