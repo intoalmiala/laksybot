@@ -7,13 +7,13 @@ import telegram
 import os
 import urllib
 
-if not isdir(os.environ['HOME']  + '/laksybot/ryhmät'):
-    os.mkdirs(os.environ['HOME']  + '/laksybot/ryhmät')
+if not os.path.isdir(os.environ['HOME']  + '/laksybot/ryhmät'):
+    os.makedirs(os.environ['HOME']  + '/laksybot/ryhmät')
 os.chdir(os.environ['HOME']  + '/laksybot/ryhmät')   
 
 
 
-TOKEN = "" #This is for the authentication of the bot.
+TOKEN = "386957960:AAEWqf1iFMjnHk7yJfqK9pHVuWiTaxQpJ1I" #This is for the authentication of the bot.
 lxybot = telegram.Bot(TOKEN)
 URL = "https://api.telegram.org/bot{}/".format(TOKEN)
 
@@ -26,7 +26,7 @@ def getTopClassConfidence(top_class, response):
 def watson(text): #This function deternies, which school subject is being talked about in the input string.
     natural_language_classifier = NaturalLanguageClassifierV1(
         username='5b314083-6286-4ad6-86b0-c6d0ea4aa266',
-        password='')
+        password='mawh434bmDVG')
 
     response = natural_language_classifier.classify('1e0d8ex232-nlc-26798', text)
     top_class = response['top_class']
@@ -192,9 +192,6 @@ def main():
         if last_message != last_message_before: # All this happens if somethig new has happened since last update.
             last_title = getChatTitle(last_message)
             if last_message_type == 'text' and watson(last_message_content['text']) != None: # How text messages are treated.
-                            chat_id = lastChatIdText(getUpdates())[1]
-            if last_message_type == 'added' and last_message['new_chat_participant']['username'] == 'lxybot':
-                sendMessage(chat_id, 'Hei, minä olen Läksybot.\nKun joku laittaa kuvan läksyistä, minä muistan sen, ja kun joku kysyy läksyjä, niin minä kerron ne.')
                 print('Sain viestin:', last_message_content['text'])
                 chat_id = lastChatIdText(getUpdates())[1]
                 kouluaine = watson(last_message_content['text'])
@@ -205,6 +202,9 @@ def main():
                 path += kouluaine + '.jpg'
                 print(kouluaine+'\n')
                 sendImage(chat_id, path, 'Tässä on aineen {} läksy.'.format(kouluaine.lower()))
+            if last_message_type == 'added' and last_message['new_chat_participant']['username'] == 'lxybot':
+                sendMessage(chat_id, 'Hei, minä olen Läksybot.\nKun joku laittaa kuvan läksyistä, minä muistan sen, ja kun joku kysyy läksyjä, niin minä kerron ne.')
+            
                 
             elif last_message_type == 'caption' and '@' in last_message_content['caption']: # How images are treated.
                 caption = last_message['message']['caption']
@@ -224,4 +224,3 @@ def main():
     
 if __name__ == '__main__': # If a foreign script calls this file, it still works.
     main()
-
