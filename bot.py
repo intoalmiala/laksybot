@@ -156,7 +156,7 @@ def getMessageType(dictionary): # Returns the type of the last message sent.
     elif 'new_chat_participant' in dictionary:
         return 'added'
 
-def sendImage(chat_id, path, caption=''): # Sends an image to the chat_id provided. Path is the location that the image is going to uploaded from. Caption is optional.
+def sendImage(chat_id, path, caption='', kouluaine): # Sends an image to the chat_id provided. Path is the location that the image is going to uploaded from. Caption is optional.
     try:
         lxybot.send_photo(chat_id=chat_id, photo=open(path, 'rb'), caption=caption)
     except FileNotFoundError:
