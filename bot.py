@@ -7,8 +7,6 @@ import telegram
 import os
 import urllib
 
-if not os.path.isdir(os.environ['HOME']  + '/laksybot/ryhmät'):
-    os.makedirs(os.environ['HOME']  + '/laksybot/ryhmät')
 os.chdir(os.environ['HOME']  + '/laksybot/ryhmät')   
 
 
@@ -30,6 +28,7 @@ def watson(text): #This function deternies, which school subject is being talked
 
     response = natural_language_classifier.classify('1e0d8ex232-nlc-26798', text)
     top_class = response['top_class']
+    print(getTopClassConfidence(top_class, response))
     if getTopClassConfidence(top_class, response) <= 0.45:
         return None
     else:
@@ -82,7 +81,7 @@ def lastChatIdText(updates): # Returns the last chat id that is being used in di
         except:
             try:
                 text = updates["result"][last_update]["message"]["caption"]
-            except: 
+            except:
                 raise Exception('Ei ole viesti')
     chat_id = updates["result"][last_update]["message"]["chat"]["id"]
     return [text, chat_id]
@@ -94,8 +93,8 @@ def lastSenderId(update):
         return update['message']['from']['id']
 
 
-def sendMessage(chat_id, text): #Sends a message to a given chat_id.
-    text = urllib.parse.quote_plus(text.encode('utf-8'))
+def sendMessage(text, chat_id): #Sends a message to a given chat_id.
+    text = urllib.parse.quote(text.encode('utf-8'))
     url = URL + "sendMessage?text={}&chat_id={}".format(text, chat_id)
     print('Lähetin viestin: {} {}:lle'.format(text, chat_id))
     getUrl(url)
@@ -156,14 +155,15 @@ def getMessageType(dictionary): # Returns the type of the last message sent.
         return 'photo'
     elif 'text' in dictionary:
         return 'text'
-    elif 'new_chat_participant' in dictionary:
-        return 'added'
 
-def sendImage(chat_id, path, kouluaine, caption=''): # Sends an image to the chat_id provided. Path is the location that the image is going to uploaded from. Caption is optional.
+def sendImage(chat_id, path, caption=''): # Sends an image to the chat_id provided. Path is the location that the image is going to uploaded from. Caption is optional.
     try:
         lxybot.send_photo(chat_id=chat_id, photo=open(path, 'rb'), caption=caption)
     except FileNotFoundError:
-        sendMessage(lastSenderId(getLastUpdate(getUpdates())), 'En ole saanut aineen {} läksyjä :E'.format(kouluaine.lower()))
+        kouluaine_eroteltu = path.split('/')
+        kouluaine = kouluaine_eroteltu[len(kouluaine_eroteltu) - 1]
+        kouluaine = kouluaine.split('.')[0]
+        sendMessage('Et ole kertonut minulle aineen {} läksyjä!'.format(kouluaine.lower()), lastSenderId(getLastUpdate(getUpdates())))
     
 def getChatTitle(update): # Gets the last message sender, or the group name, depending whether the last message was sent in a group or a private conversation.
     if update['message']['chat']['type'] == 'group':
@@ -172,12 +172,10 @@ def getChatTitle(update): # Gets the last message sender, or the group name, dep
         return update['message']['chat']['first_name']
     else:
         raise Exception('chatin titleä ei löytynyt')
-
-
-def getChatId(update):
-    return update['message']['chat']['id']    
     
     
+    
+
 def main():
     last_message_before = None
     while True:
@@ -194,33 +192,41 @@ def main():
 
         if last_message != last_message_before: # All this happens if somethig new has happened since last update.
             last_title = getChatTitle(last_message)
+            print('Uusi viesti')
+            try:
+                print('Lähettäjä: {}; Viesti: {}'.format(last_title, last_message_content['caption']))
+                print(watson(last_message_content['caption']))
+            except:
+                try:
+                    print('Lähettäjä: {}; Viesti: {}'.format(last_title, last_message_content['text']))
+                    print(watson(last_message_content['text']))
+                except:
+                    pass
+            print(lastChatIdText(getUpdates())[1])
+            chat_id = lastChatIdText(getUpdates())[1]
             if last_message_type == 'text' and watson(last_message_content['text']) != None: # How text messages are treated.
                 print('Sain viestin:', last_message_content['text'])
-                chat_id = lastChatIdText(getUpdates())[1]
+                
                 kouluaine = watson(last_message_content['text'])
                 print(last_title + 'ltä')
-                path = os.environ['HOME'] + '/laksybot/ryhmät/{}/'.format(chat_id)
+                path = os.environ['HOME'] + '/laksybot/ryhmät/{}/'.format(last_title)
                 if not os.path.isdir(path):
                     os.mkdir(path)
                 path += kouluaine + '.jpg'
                 print(kouluaine+'\n')
-                sendImage(chat_id, path, kouluaine, 'Tässä on aineen {} läksy :D'.format(kouluaine.lower()))
-            if last_message_type == 'added' and last_message['new_chat_participant']['username'] == 'lxybot':
-                sendMessage(chat_id, 'Hei, minä olen Läksybot.\nKun joku laittaa kuvan läksyistä, minä muistan sen, ja kun joku kysyy läksyjä, niin minä kerron ne.')
-            
+                sendImage(chat_id, path, 'Tässä on aineen {} läksy.'.format(kouluaine.lower()))
                 
             elif last_message_type == 'caption' and watson(last_message_content['caption']) != None: # How images are treated.
-                chat_id = lastChatIdText(getUpdates())[1]
                 caption = last_message['message']['caption']
                 print('Sain kuvan, jonka käpsöni oli:', caption)
                 kouluaine = watson(caption)
-                if not os.path.isdir('./{}'.format(chat_id)):
-                    os.mkdir('./{}'.format(chat_id))
-                if os.path.isfile('{}/{}.jpg'.format(chat_id, kouluaine)):
-                    os.remove('{}/{}.jpg'.format(chat_id, kouluaine))
-                getFile(getFileId(1), './{}/{}.jpg'.format(chat_id, kouluaine))
+                if not os.path.isdir('./{}'.format(last_title)):
+                    os.mkdir('./{}'.format(last_title))
+                if os.path.isfile('{}/{}.jpg'.format(last_title, kouluaine)):
+                    os.remove('{}/{}.jpg'.format(last_title, kouluaine))
+                getFile(getFileId(1), './{}/{}.jpg'.format(last_title, kouluaine))
                 print('\nKuva ladattu onnistuneesti')
-                sendMessage(chat_id, 'Selvä, muistan nyt läksyt aineesta {}.'.format(kouluaine.lower()))
+                sendMessage('Selvä! Muistan nyt aineen {} läksyn!'.format(kouluaine.lower()), chat_id)
         last_message_before = last_message
     last_message_before = last_message
     
@@ -228,3 +234,4 @@ def main():
     
 if __name__ == '__main__': # If a foreign script calls this file, it still works.
     main()
+
