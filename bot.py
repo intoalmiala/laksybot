@@ -2,18 +2,45 @@ import json
 import requests
 import time
 import wget
-from watson_developer_cloud import NaturalLanguageClassifierV1
+from watson_developer_cloud import NaturalLanguageClassifierV1, VisualRecognitionV3
 import telegram
 import os
 import urllib
 
-os.chdir(os.environ['HOME']  + '/laksybot/ryhmät')   
+try:
+    os.chdir(os.environ['HOME']  + '/laksybot')   
+except:
+    os.mkdir(os.environ['HOME'] + '/laksybot')
+    os.chdir(os.environ['HOME']  + '/laksybot')
 
 
 
 TOKEN = "386957960:AAEWqf1iFMjnHk7yJfqK9pHVuWiTaxQpJ1I" #This is for the authentication of the bot.
 lxybot = telegram.Bot(TOKEN)
 URL = "https://api.telegram.org/bot{}/".format(TOKEN)
+
+{
+  "url": "https://gateway-a.watsonplatform.net/visual-recognition/api",
+  "note": "This is your previous free key. If you want a different one, please wait 24 hours after unbinding the key and try again.",
+  "api_key": "d51997e99c32eeea53de579fa1337829f6c1c3b8"
+}
+def visual_recognition(path):
+    def getHighestClass(response):
+        response = response['images'][0]['classifiers'][0]['classes']
+        classes, scores = [], []
+        for i in response:
+            classes.append(i['class'])
+            scores.append(i['score'])
+        if response[0]['score'] > response[1]['score']:
+            #print(response[0]['class'])
+            return response[0]['class']
+        else:
+            #print(response[1]['class'])
+            return response[1]['class']
+    visual_recognition = VisualRecognitionV3('2016-05-20', api_key='d51997e99c32eeea53de579fa1337829f6c1c3b8')
+    response = visual_recognition.classify(images_file=open(path, 'rb'), threshold=0, classifier_ids=['liitutauluvaiei_1285787542'])
+    thingy = getHighestClass(response)
+    return thingy
 
 def getTopClassConfidence(top_class, response):
     for i in response['classes']:
@@ -75,15 +102,18 @@ def lastChatIdText(updates): # Returns the last chat id that is being used in di
     last_update = num_updates - 1
     try:
         text = updates["result"][last_update]["message"]["text"]
+        chat_id = updates["result"][last_update]["message"]["chat"]["id"]
     except:
         try:
             text = updates["result"][last_update]["edited_message"]["text"]
+            chat_id = updates["result"][last_update]["edited_message"]["chat"]["id"]
         except:
             try:
                 text = updates["result"][last_update]["message"]["caption"]
+                chat_id = updates["result"][last_update]["message"]["chat"]["id"]
             except:
                 raise Exception('Ei ole viesti')
-    chat_id = None#updates["result"][last_update]["message"]["chat"]["id"]
+    #chat_id = updates["result"][last_update]["message"]["chat"]["id"]
     return [text, chat_id]
     
 def lastSenderId(update):
@@ -223,13 +253,26 @@ def main():
                 caption = last_message['message']['caption']
                 print('Sain kuvan, jonka käpsöni oli:', caption)
                 kouluaine = watson(caption)
-                if not os.path.isdir('./{}'.format(last_title)):
-                    os.mkdir('./{}'.format(last_title))
-                if os.path.isfile('{}/{}.jpg'.format(last_title, kouluaine)):
-                    os.remove('{}/{}.jpg'.format(last_title, kouluaine))
-                getFile(getFileId(1), './{}/{}.jpg'.format(last_title, kouluaine))
+                if not os.path.isdir('./ryhmät/{}'.format(last_title)):
+                    os.mkdir('./ryhmät/{}'.format(last_title))
+                
+                if not os.path.isdir('./temp/{}'.format(last_title)):
+                    os.mkdir('./temp/{}'.format(last_title))
+                if os.path.isfile('./temp/{}/{}.jpg'.format(last_title, kouluaine)):
+                    os.remove('./temp/{}/{}.jpg'.format(last_title, kouluaine))
+                getFile(getFileId(1), 'temp/{}/{}.jpg'.format(last_title, kouluaine))
+                print(visual_recognition('./temp/{}/{}.jpg'.format(last_title, kouluaine)))
+                if visual_recognition('./temp/{}/{}.jpg'.format(last_title, kouluaine)) == 'liitutaulu':
+                    if os.path.isfile('./ryhmät/{}/{}.jpg'.format(last_title, kouluaine)):
+                        os.remove('./ryhmät/{}/{}.jpg'.format(last_title, kouluaine))
+                    os.rename('./temp/{}/{}.jpg'.format(last_title, kouluaine), './ryhmät/{}/{}.jpg'.format(last_title, kouluaine))
+                    sendMessage('Selvä! Muistan nyt aineen {} läksyn!'.format(kouluaine.lower()), chat_id)
+                else:
+                    sendMessage('Hyvä yritys, mutta tuolla kuvalla ei ole mitään tekemistä läksyjen kanssa...', chat_id)
+                    print('hei')
+                    print('On liitutaulu.')
                 print('\nKuva ladattu onnistuneesti')
-                sendMessage('Selvä! Muistan nyt aineen {} läksyn!'.format(kouluaine.lower()), chat_id)
+                
         last_message_before = last_message
     last_message_before = last_message
     
