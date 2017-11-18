@@ -204,7 +204,8 @@ def main():
                     pass
             print(lastChatIdText(getUpdates())[1])
             chat_id = lastChatIdText(getUpdates())[1]
-            if last_message_type == 'text' and watson(last_message_content['text']) != None: # How text messages are treated.
+            if last_message_type == 'text' and len(last_message_content['text']) < 1024 and watson(last_message_content['text']) != None: # How text messages are treated.
+                
                 print('Sain viestin:', last_message_content['text'])
                 
                 kouluaine = watson(last_message_content['text'])
@@ -216,7 +217,9 @@ def main():
                 print(kouluaine+'\n')
                 sendImage(chat_id, path, 'Tässä on aineen {} läksy.'.format(kouluaine.lower()))
                 
-            elif last_message_type == 'caption' and watson(last_message_content['caption']) != None: # How images are treated.
+            elif last_message_type == 'caption' and len(last_message_content['caption']) < 1024 and watson(last_message_content['caption']) != None: # How images are treated.
+                if len(last_message_content['caption']) > 1024:
+                    continue
                 caption = last_message['message']['caption']
                 print('Sain kuvan, jonka käpsöni oli:', caption)
                 kouluaine = watson(caption)
