@@ -13,17 +13,16 @@ except:
     os.mkdir(os.environ['HOME'] + '/laksybot')
     os.chdir(os.environ['HOME']  + '/laksybot')
 
+    
+# Authentication stuff
+telegram_bot_token = ''
+watson_v_r_token = ''
+watson_nlc_password = ''
+watson_nlc_username = ''
 
+lxybot = telegram.Bot(telegram_bot_token)
+URL = "https://api.telegram.org/bot{}/".format(telegram_bot_token)
 
-TOKEN = "386957960:AAEWqf1iFMjnHk7yJfqK9pHVuWiTaxQpJ1I" #This is for the authentication of the bot.
-lxybot = telegram.Bot(TOKEN)
-URL = "https://api.telegram.org/bot{}/".format(TOKEN)
-
-{
-  "url": "https://gateway-a.watsonplatform.net/visual-recognition/api",
-  "note": "This is your previous free key. If you want a different one, please wait 24 hours after unbinding the key and try again.",
-  "api_key": "d51997e99c32eeea53de579fa1337829f6c1c3b8"
-}
 def visual_recognition(path):
     def getHighestClass(response):
         response = response['images'][0]['classifiers'][0]['classes']
@@ -37,7 +36,7 @@ def visual_recognition(path):
         else:
             #print(response[1]['class'])
             return response[1]['class']
-    visual_recognition = VisualRecognitionV3('2016-05-20', api_key='d51997e99c32eeea53de579fa1337829f6c1c3b8')
+    visual_recognition = VisualRecognitionV3('2016-05-20', api_key=watson_v_r_token)
     response = visual_recognition.classify(images_file=open(path, 'rb'), threshold=0, classifier_ids=['liitutauluvaiei_1285787542'])
     thingy = getHighestClass(response)
     return thingy
@@ -50,8 +49,8 @@ def getTopClassConfidence(top_class, response):
 
 def watson(text): #This function deternies, which school subject is being talked about in the input string.
     natural_language_classifier = NaturalLanguageClassifierV1(
-        username='5b314083-6286-4ad6-86b0-c6d0ea4aa266',
-        password='mawh434bmDVG')
+        username=watson_nlc_username,
+        password=watson_nlc_password)
 
     response = natural_language_classifier.classify('1e0d8ex232-nlc-26798', text)
     top_class = response['top_class']
