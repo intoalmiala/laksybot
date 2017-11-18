@@ -232,8 +232,9 @@ def main():
                     print(watson(last_message_content['text']))
                 except:
                     pass
-            print(lastChatIdText(getUpdates())[1])
+            
             chat_id = lastChatIdText(getUpdates())[1]
+            print(chat_id)
             if last_message_type == 'text' and len(last_message_content['text']) < 1024 and watson(last_message_content['text']) != None: # How text messages are treated.
                 
                 print('Sain viestin:', last_message_content['text'])
