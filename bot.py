@@ -220,6 +220,7 @@ def main():
                 raise Exception('Not a message.')
 
         if last_message != last_message_before: # All this happens if somethig new has happened since last update.
+            chat_id = lastChatIdText(getUpdates())[1]
             last_title = getChatTitle(last_message_content)
             print('Uusi viesti')
             try:
@@ -230,6 +231,7 @@ def main():
                     print('Lähettäjä: {}; Viesti: {}; chat_id: {}'.format(last_title, last_message_content['text'], chat_id))
                     print(watson(last_message_content['text']))
                 except:
+                    print('virhe')
                     pass
             
             chat_id = lastChatIdText(getUpdates())[1]
