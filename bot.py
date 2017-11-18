@@ -77,13 +77,13 @@ def lastChatIdText(updates): # Returns the last chat id that is being used in di
         text = updates["result"][last_update]["message"]["text"]
     except:
         try:
-            text = updates["result"][last_update]["message"]["edited_text"]
+            text = updates["result"][last_update]["edited_message"]["text"]
         except:
             try:
                 text = updates["result"][last_update]["message"]["caption"]
             except:
                 raise Exception('Ei ole viesti')
-    chat_id = updates["result"][last_update]["message"]["chat"]["id"]
+    chat_id = None#updates["result"][last_update]["message"]["chat"]["id"]
     return [text, chat_id]
     
 def lastSenderId(update):
@@ -166,10 +166,10 @@ def sendImage(chat_id, path, caption=''): # Sends an image to the chat_id provid
         sendMessage('Et ole kertonut minulle aineen {} läksyjä!'.format(kouluaine.lower()), lastSenderId(getLastUpdate(getUpdates())))
     
 def getChatTitle(update): # Gets the last message sender, or the group name, depending whether the last message was sent in a group or a private conversation.
-    if update['message']['chat']['type'] == 'group':
-        return update['message']['chat']['title']
-    elif update['message']['chat']['type'] == 'private':
-        return update['message']['chat']['first_name']
+    if update['chat']['type'] == 'group':
+        return update['chat']['title']
+    elif update['chat']['type'] == 'private':
+        return update['chat']['first_name']
     else:
         raise Exception('chatin titleä ei löytynyt')
     
@@ -191,7 +191,7 @@ def main():
                 raise Exception('Not a message.')
 
         if last_message != last_message_before: # All this happens if somethig new has happened since last update.
-            last_title = getChatTitle(last_message)
+            last_title = getChatTitle(last_message_content)
             print('Uusi viesti')
             try:
                 print('Lähettäjä: {}; Viesti: {}'.format(last_title, last_message_content['caption']))
