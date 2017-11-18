@@ -224,28 +224,23 @@ def main():
             last_title = getChatTitle(last_message_content)
             print('Uusi viesti')
             try:
-                print('Lähettäjä: {}; Viesti: {}'.format(last_title, last_message_content['caption']))
+                print('Lähettäjä: {}; Viesti: {}; chat_id: {}'.format(last_title, last_message_content['caption'], chat_id))
                 print(watson(last_message_content['caption']))
             except:
                 try:
-                    print('Lähettäjä: {}; Viesti: {}'.format(last_title, last_message_content['text']))
+                    print('Lähettäjä: {}; Viesti: {}; chat_id: {}'.format(last_title, last_message_content['text'], chat_id))
                     print(watson(last_message_content['text']))
                 except:
                     pass
             
             chat_id = lastChatIdText(getUpdates())[1]
-            print(chat_id)
             if last_message_type == 'text' and len(last_message_content['text']) < 1024 and watson(last_message_content['text']) != None: # How text messages are treated.
                 
-                print('Sain viestin:', last_message_content['text'])
-                
                 kouluaine = watson(last_message_content['text'])
-                print(last_title + 'ltä')
                 path = os.environ['HOME'] + '/laksybot/ryhmät/{}/'.format(last_title)
                 if not os.path.isdir(path):
                     os.mkdir(path)
                 path += kouluaine + '.jpg'
-                print(kouluaine+'\n')
                 sendImage(chat_id, path, 'Tässä on aineen {} läksy.'.format(kouluaine.lower()))
                 
             elif last_message_type == 'caption' and len(last_message_content['caption']) < 1024 and watson(last_message_content['caption']) != None: # How images are treated.
@@ -270,8 +265,7 @@ def main():
                     sendMessage('Selvä! Muistan nyt aineen {} läksyn!'.format(kouluaine.lower()), chat_id)
                 else:
                     sendMessage('Hyvä yritys, mutta tuolla kuvalla ei ole mitään tekemistä läksyjen kanssa...', chat_id)
-                    print('hei')
-                    print('On liitutaulu.')
+                    print('Ei ole liitutaulu.')
                 print('\nKuva ladattu onnistuneesti')
                 
         last_message_before = last_message
