@@ -294,14 +294,31 @@ def getLastUpdateId(updates):
     Takes:
         JSON updates : A JSON object of the same form as that is returned from the getUpdates() function.
     Returns:
-        int update_id : 
+        int update_id : The update id of the last update.
+    Note:
+        None
+    Raises:
+        None
+    """
     
     update_ids = []
     for update in updates["result"]:
         update_ids.append(int(update["update_id"]))
     return max(update_ids)
 
-def getLastUpdate(updates): # Returns the last event that is visible in the getUpdates JSON object.
+def getLastUpdate(updates): 
+    """
+    Desc:
+        Iterates in the getUpdates() JSON object and returns the last update available.
+    Takes:
+        JSON updates : A JSON object of the same form as that is returned from the getUpdates() function.
+    Returns:
+        JSON i : A JSON object representing the last update.
+    Note:
+        Nonw
+    Raises:
+        Exception('No messages yet') if the updates is empty.
+    """
     update_ids = []
     if len(updates['result']) == 0:
         raise Exception('No messages yet')
@@ -312,13 +329,38 @@ def getLastUpdate(updates): # Returns the last event that is visible in the getU
             return i
 
 
-def getFile(file_id, path): #Downloads an image from telegram servers specified by an image id. path is the location that the image is going to be saved to.
+def getFile(file_id, path):
+    """
+    Desc:
+        Downloads an image from telegram servers.
+    Takes:
+        int file_id : Specifies which image is the one to be downloaded.
+        str path : The local file path that the image is going to be saved to.
+    Returns:
+        None
+    Note:
+        None
+    Raises:
+        None
+    """
     json = jsonFromUrl(URL + 'getFile?file_id={}'.format(file_id))
     url = 'https://api.telegram.org/file/bot{}/{}'.format(telegram_bot_token, json['result']['file_path'])
     downloadUrl(url, path)
 
 
-def getFileId(resolution): # Gets the id of the best-quality image.
+def getFileId(resolution): 
+    """
+    Desc:
+        Gets the best-quality id to the last image sent.
+    Takes:
+        bool resolution : if True, returns the best-quality id, if False, returns the worst-quality id.
+    Returns:
+        str i['file_id'] : the file id that sepcifies the file that is downloaded by the getFile() function.
+    Note:
+        None
+    Raises:
+        None
+    """
     updates = getUpdates()
     file_id = ''
     greatest = 0
