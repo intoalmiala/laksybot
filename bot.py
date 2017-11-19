@@ -35,9 +35,9 @@ def visual_recognition(path):
     Desc: 
         Returns, whether or not a given input is a picture about a black board.
     Takes:
-        str path : A string containing the path to the image that is going to be classified.
+        str path    : A string containing the path to the image that is going to be classified.
     Returns:
-        str thingy : whether a string containing 'liitutaulu' or 'epäliitutauli', depending the outcome of the Visual Recognition service.
+        str thingy  : whether a string containing 'liitutaulu' or 'epäliitutaulu', depending the outcome of the Visual Recognition service.
     Note:
         None
     Raises:
@@ -48,9 +48,9 @@ def visual_recognition(path):
         Desc: 
             Returns the class with highest score from the JSON object that the parent funtion returns.
         Takes:
-            JSON response : the JSON object that the parent function returns.
+            JSON response   : the JSON object that the parent function returns.
         Returns:
-            float The highest score out of the classes.
+            float   : The highest score out of the classes.
         Note:
             Works only with the parent function; nothing else.
         Raises:
@@ -79,9 +79,9 @@ def watson(text): #This function deternies, which school subject is being talked
     Desc:
         An IBM Watson Natural Language Classifier instance, that determines, what school subjet is being talked about.
     Takes:
-        str text : The input string that the function classifies.
+        str text        : The input string that the function classifies.
     Returns:
-        str top_class : The school subject with the highest confidence. 
+        str top_class   : The school subject with the highest confidence. 
         IF the confidence is under the certain point, it returns only
         none None
     Notes:
@@ -94,10 +94,10 @@ def watson(text): #This function deternies, which school subject is being talked
         Desc:
             Returns the confidence of the parent funtion's top_class str.
         Takes:
-            str top_class : The class with the highes confidence; See the desc of the parent function.
-            JSON response : The JSON object representing the response from the IBM NLC.
+            str top_class   : The class with the highes confidence; See the desc of the parent function.
+            JSON response   : The JSON object representing the response from the IBM NLC.
         Retunrs:
-            float confidence : The confidence of the top class.
+            float confidence    : The confidence of the top class.
         Note:
             Only works together with the parent funcntion.
         Raises:
@@ -123,11 +123,11 @@ def watson(text): #This function deternies, which school subject is being talked
 def getUrl(url):
     """
     Desc:
-        Returns the content of a given url.
+        Returns the content of a given URL.
     Takes:
-        str url : A url of which's content is going to be returned.
+        str url : A URL of which's content is going to be returned.
     Returns:
-        str content : The contents of the url
+        str content : The contents of the URL
     Note:
         None
     Raises:
@@ -138,19 +138,57 @@ def getUrl(url):
     return content
 
 
-def downloadUrl(url, name): #Downloads the contents of the input url.
+def downloadUrl(url, name):
+    """
+    Desc:
+        Downloads the contents of the input URL.
+    Takes:
+        str url     : The URL to download
+        str name    : The name for the downloaded content
+    Returns:
+        None
+    Note:
+        None
+    Raises:
+        None
+    """
     wget.download(url,out=name)
 
 
-def jsonFromUrl(url): #Returns a json object from the contents of a given url.
+def jsonFromUrl(url):
+    """
+    Desc:
+        Returns a JSON object from the contents of a given URL.
+    Takes:
+        str url : The url where the JSON is
+    Returns:
+        dict js : The JSON from the URL as a dictionary
+    Note:
+        None
+    Raises:
+        None
+    """
     content = getUrl(url)
     js = json.loads(content)
     return js
 
 
-update_counter = 0
+update_counter = 0 # a counter for getting updates
 
 def getUpdates(): # Returns a JSON object representing the events that occur during interacting with the bot.
+    """
+    Desc:
+        Returns the contents of a 'getUpdates' Telegram API call (as a dictionary), which is
+        a JSON object representing the events that occur during interacton with the bot.
+    Takes:
+        None
+    Returns:
+        dict js : The JSON object representing the events that occur during interaction with the bot
+    Note:
+        If there are more than 90 entries in the JSON object, getUpdatesWithOffset() is called instead.
+    Raises:
+        None
+    """
     global update_counter
     url = URL + "getUpdates?timeout=100&alllowed_updates=['message']"
     if update_counter > 90:
@@ -162,6 +200,19 @@ def getUpdates(): # Returns a JSON object representing the events that occur dur
 
 
 def getUpdatesWithOffset(offset=None):
+    """
+    Desc:
+        Does the same as getUpdates()except with an offset, which means that it removes
+        the old updates from the JSON object so that the limit (100) is not exceeded.
+    Takes:
+        int offset (optional, default: None)   : The offset for the API call, meaning the last update id that will be saved
+    Returns:
+        dict js : The JSON object representing the events that occur during interaction with the bot
+    Note:
+        None
+    Raises:
+        None
+    """
     url = URL + "getUpdates?timeout=100&alllowed_updates=['message']&offset={}".format(offset)
     js = jsonFromUrl(url)
     return js
