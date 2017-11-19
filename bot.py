@@ -7,24 +7,55 @@ import telegram
 import os
 import urllib
 
+
+# Authentication stuff
+telegram_bot_token= ''
+watson_v_r_token = ''
+watson_nlc_password = ''
+watson_nlc_username = ''
+watson_nlc_id = ''
+
+
+# Creating some directories, if they do not exist.
 try:
     os.chdir(os.environ['HOME']  + '/laksybot')   
 except:
     os.mkdir(os.environ['HOME'] + '/laksybot')
     os.chdir(os.environ['HOME']  + '/laksybot')
+if not os.path.isdir(os.environ['HOME']  + '/laksybot/temp'): # ./temp is used to store the images, until they are classified by the visual recognition service...
+    os.mkdir(os.environ['HOME']  + '/laksybot/temp')
+if not os.path.isdir(os.environ['HOME']  + '/laksybot/ryhmät'): # ... after that, they are moved into ./ryhmät dir.
+    os.mkdir(os.environ['HOME']  + '/laksybot/ryhmät')
 
-    
-# Authentication stuff
-telegram_bot_token = ''
-watson_v_r_token = ''
-watson_nlc_password = ''
-watson_nlc_username = ''
-
-lxybot = telegram.Bot(telegram_bot_token)
-URL = "https://api.telegram.org/bot{}/".format(telegram_bot_token)
+lxybot = telegram.Bot(telegram_bot_token) # initializing a telegram bot instance.
+URL = "https://api.telegram.org/bot{}/".format(telegram_bot_token) # the base URL of the bot api.
 
 def visual_recognition(path):
+    """
+    Desc: 
+        Returns, whether or not a given input is a picture about a black board.
+    Takes:
+        str path : A string containing the path to the image that is going to be classified.
+    Returns:
+        str thingy : whether a string containing 'liitutaulu' or 'epäliitutauli', depending the outcome of the Visual Recognition service.
+    Note:
+        None
+    Raises:
+        None
+    """
     def getHighestClass(response):
+        """
+        Desc: 
+            Returns the class with highest score from the JSON object that the parent funtion returns.
+        Takes:
+            JSON response : the JSON object that the parent function returns.
+        Returns:
+            float The highest score out of the classes.
+        Note:
+            Works only with the parent function; nothing else.
+        Raises:
+            None.
+        """
         response = response['images'][0]['classifiers'][0]['classes']
         classes, scores = [], []
         for i in response:
@@ -41,18 +72,46 @@ def visual_recognition(path):
     thingy = getHighestClass(response)
     return thingy
 
-def getTopClassConfidence(top_class, response):
-    for i in response['classes']:
-        if i['class_name'] == top_class:
-            return i['confidence']
 
 
 def watson(text): #This function deternies, which school subject is being talked about in the input string.
+    """
+    Desc:
+        An IBM Watson Natural Language Classifier instance, that determines, what school subjet is being talked about.
+    Takes:
+        str text : The input string that the function classifies.
+    Returns:
+        str top_class : The school subject with the highest confidence. 
+        IF the confidence is under the certain point, it returns only
+        none None
+    Notes:
+        None
+    Raises:
+        None
+    """
+    def getTopClassConfidence(top_class, response):
+        """
+        Desc:
+            Returns the confidence of the parent funtion's top_class str.
+        Takes:
+            str top_class : The class with the highes confidence; See the desc of the parent function.
+            JSON response : The JSON object representing the response from the IBM NLC.
+        Retunrs:
+            float confidence : The confidence of the top class.
+        Note:
+            Only works together with the parent funcntion.
+        Raises:
+            None
+        """
+        for i in response['classes']:
+            if i['class_name'] == top_class:
+                return i['confidence']
+
     natural_language_classifier = NaturalLanguageClassifierV1(
         username=watson_nlc_username,
         password=watson_nlc_password)
 
-    response = natural_language_classifier.classify('1e0d8ex232-nlc-26798', text)
+    response = natural_language_classifier.classify(watson_nlc_id, text)
     top_class = response['top_class']
     print(getTopClassConfidence(top_class, response))
     if getTopClassConfidence(top_class, response) <= 0.45:
@@ -61,7 +120,19 @@ def watson(text): #This function deternies, which school subject is being talked
         return top_class
 
 
-def getUrl(url): # Opens a url
+def getUrl(url):
+    """
+    Desc:
+        Returns the content of a given url.
+    Takes:
+        str url : A url of which's content is going to be returned.
+    Returns:
+        str content : The contents of the url
+    Note:
+        None
+    Raises:
+        None
+    """
     response = requests.get(url)
     content = response.content.decode("utf8")
     return content
@@ -148,7 +219,7 @@ def getLastUpdate(updates): # Returns the last event that is visible in the getU
 
 def getFile(file_id, path): #Downloads an image from telegram servers specified by an image id. path is the location that the image is going to be saved to.
     json = jsonFromUrl(URL + 'getFile?file_id={}'.format(file_id))
-    url = 'https://api.telegram.org/file/bot{}/{}'.format( TOKEN, json['result']['file_path'])
+    url = 'https://api.telegram.org/file/bot{}/{}'.format(telegram_bot_token, json['result']['file_path'])
     downloadUrl(url, path)
 
 
@@ -238,10 +309,12 @@ def main():
             if last_message_type == 'text' and len(last_message_content['text']) < 1024 and watson(last_message_content['text']) != None: # How text messages are treated.
                 
                 kouluaine = watson(last_message_content['text'])
-                path = os.environ['HOME'] + '/laksybot/ryhmät/{}/'.format(last_title)
+                path = os.environ['HOME'] + '/laksybot/ryhmät/{}/'.format(chat_id)
+                
                 if not os.path.isdir(path):
                     os.mkdir(path)
                 path += kouluaine + '.jpg'
+                print(path)
                 sendImage(chat_id, path, 'Tässä on aineen {} läksy.'.format(kouluaine.lower()))
                 
             elif last_message_type == 'caption' and len(last_message_content['caption']) < 1024 and watson(last_message_content['caption']) != None: # How images are treated.
@@ -250,19 +323,18 @@ def main():
                 caption = last_message['message']['caption']
                 print('Sain kuvan, jonka käpsöni oli:', caption)
                 kouluaine = watson(caption)
-                if not os.path.isdir('./ryhmät/{}'.format(last_title)):
-                    os.mkdir('./ryhmät/{}'.format(last_title))
-                
-                if not os.path.isdir('./temp/{}'.format(last_title)):
-                    os.mkdir('./temp/{}'.format(last_title))
-                if os.path.isfile('./temp/{}/{}.jpg'.format(last_title, kouluaine)):
-                    os.remove('./temp/{}/{}.jpg'.format(last_title, kouluaine))
-                getFile(getFileId(1), 'temp/{}/{}.jpg'.format(last_title, kouluaine))
-                print(visual_recognition('./temp/{}/{}.jpg'.format(last_title, kouluaine)))
-                if visual_recognition('./temp/{}/{}.jpg'.format(last_title, kouluaine)) == 'liitutaulu':
-                    if os.path.isfile('./ryhmät/{}/{}.jpg'.format(last_title, kouluaine)):
-                        os.remove('./ryhmät/{}/{}.jpg'.format(last_title, kouluaine))
-                    os.rename('./temp/{}/{}.jpg'.format(last_title, kouluaine), './ryhmät/{}/{}.jpg'.format(last_title, kouluaine))
+                if not os.path.isdir('./ryhmät/{}'.format(chat_id)):
+                    os.mkdir('./ryhmät/{}'.format(chat_id))
+                if not os.path.isdir('./temp/{}'.format(chat_id)):
+                    os.mkdir('./temp/{}'.format(chat_id))
+                if os.path.isfile('./temp/{}/{}.jpg'.format(chat_id, kouluaine)):
+                    os.remove('./temp/{}/{}.jpg'.format(chat_id, kouluaine))
+                getFile(getFileId(1), 'temp/{}/{}.jpg'.format(chat_id, kouluaine))
+                print(visual_recognition('./temp/{}/{}.jpg'.format(chat_id, kouluaine)))
+                if visual_recognition('./temp/{}/{}.jpg'.format(chat_id, kouluaine)) == 'liitutaulu':
+                    if os.path.isfile('./ryhmät/{}/{}.jpg'.format(chat_id, kouluaine)):
+                        os.remove('./ryhmät/{}/{}.jpg'.format(chat_id, kouluaine))
+                    os.rename('./temp/{}/{}.jpg'.format(chat_id, kouluaine), './ryhmät/{}/{}.jpg'.format(chat_id, kouluaine))
                     sendMessage('Selvä! Muistan nyt aineen {} läksyn!'.format(kouluaine.lower()), chat_id)
                 else:
                     sendMessage('Hyvä yritys, mutta tuolla kuvalla ei ole mitään tekemistä läksyjen kanssa...', chat_id)
