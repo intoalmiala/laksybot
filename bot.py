@@ -218,7 +218,19 @@ def getUpdatesWithOffset(offset=None):
     return js
 
 
-def lastChatIdText(updates): # Returns the last chat id that is being used in distinguishing between the homework of different groups.
+def lastChatIdText(updates): 
+    """
+    Desc:
+        Gives the chat id of the last message sent.
+    Takes:
+        JSON updates : A JSON object of the same form as that is returned from the getUpdates() function.
+    Returns:
+        list conatining the last message text and the chat id of the last message sender.
+    Note:
+        Somewhat unstable fucntion at the moment.
+    Raises:
+        Exception('Ei ole viesti') when it cannot find any text from the last message sent.
+    """
     num_updates = len(updates["result"])
     last_update = num_updates - 1
     try:
@@ -234,24 +246,56 @@ def lastChatIdText(updates): # Returns the last chat id that is being used in di
                 chat_id = updates["result"][last_update]["message"]["chat"]["id"]
             except:
                 raise Exception('Ei ole viesti')
-    #chat_id = updates["result"][last_update]["message"]["chat"]["id"]
     return [text, chat_id]
     
 def lastSenderId(update):
+    """
+    Desc:
+        If the last message was sent via a group, the group id is returned instead.
+    Takes:
+        JSON update : A JSON object of the same form as that is returned from the getUpdates() function.
+    Returns:
+        str contaning the id of the sender or a group.
+    Note:
+        Possibly going to be removed a some point.
+    Raises:
+        None
+     """
     if update['message']['chat']['type'] == 'group':
         return update['message']['chat']['id']
     if update['message']['chat']['type'] == 'private':
         return update['message']['from']['id']
 
 
-def sendMessage(text, chat_id): #Sends a message to a given chat_id.
+def sendMessage(text, chat_id): 
+    """
+    Desc:
+        Sends a message with a given text to a given content.
+    Takes:
+        str text : The message that is going to be sent.
+        str chat_id : the chat id that the message is being sent to.
+    Returns:
+        None
+    Note:
+        None
+    Raises:
+        None
+    """
     text = urllib.parse.quote(text.encode('utf-8'))
     url = URL + "sendMessage?text={}&chat_id={}".format(text, chat_id)
     print('Lähetin viestin: {} {}:lle'.format(text, chat_id))
     getUrl(url)
 
 
-def getLastUpdateId(updates): #Gets the highest id, and thus last, id from the JSON object that is returned by the getUpdates function.
+def getLastUpdateId(updates):
+    """
+    Desc:
+        Returns the last update id.
+    Takes:
+        JSON updates : A JSON object of the same form as that is returned from the getUpdates() function.
+    Returns:
+        int update_id : 
+    
     update_ids = []
     for update in updates["result"]:
         update_ids.append(int(update["update_id"]))
