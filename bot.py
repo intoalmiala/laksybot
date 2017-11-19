@@ -386,6 +386,18 @@ def getFileId(resolution):
 
 
 def getMessageType(dictionary): # Returns the type of the last message sent.
+    """
+    Desc:
+        gets the type of the last message sent.
+    Takes:
+        dict dictionary : dictionary representing the last message.
+    Returns:
+        str : 'text' if the last message type is text, 'photo' if photo and 'caption' if an image with a caption
+    Note:
+        None
+    Raises:
+        None
+    """
     if 'caption' in dictionary:
         return 'caption'
     elif 'photo' in dictionary:
