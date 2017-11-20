@@ -14,9 +14,15 @@ watson_v_r_token = ''
 watson_nlc_password = ''
 watson_nlc_username = ''
 watson_nlc_id = ''
+telegram_bot_token= '386957960:AAEWqf1iFMjnHk7yJfqK9pHVuWiTaxQpJ1I'
+watson_v_r_token = 'd51997e99c32eeea53de579fa1337829f6c1c3b8'
+watson_nlc_password = 'mawh434bmDVG'
+watson_nlc_username = '5b314083-6286-4ad6-86b0-c6d0ea4aa266'
+watson_nlc_id = 'c53147x243-nlc-6298'
 
 
-# Creating some directories, if they do not exist.
+
+# Creating some directories if they do not exist.
 try:
     os.chdir(os.environ['HOME']  + '/laksybot')   
 except:
@@ -72,9 +78,7 @@ def visual_recognition(path):
     thingy = getHighestClass(response)
     return thingy
 
-
-
-def watson(text): #This function deternies, which school subject is being talked about in the input string.
+def watson(text): #This function determines, which school subject is being talked about in the input string.
     """
     Desc:
         An IBM Watson Natural Language Classifier instance, that determines, what school subjet is being talked about.
@@ -119,7 +123,6 @@ def watson(text): #This function deternies, which school subject is being talked
     else:
         return top_class
 
-
 def getUrl(url):
     """
     Desc:
@@ -137,7 +140,6 @@ def getUrl(url):
     content = response.content.decode("utf8")
     return content
 
-
 def downloadUrl(url, name):
     """
     Desc:
@@ -153,7 +155,6 @@ def downloadUrl(url, name):
         None
     """
     wget.download(url,out=name)
-
 
 def jsonFromUrl(url):
     """
@@ -172,10 +173,9 @@ def jsonFromUrl(url):
     js = json.loads(content)
     return js
 
-
 update_counter = 0 # a counter for getting updates
 
-def getUpdates(): # Returns a JSON object representing the events that occur during interacting with the bot.
+def getUpdates(): 
     """
     Desc:
         Returns the contents of a 'getUpdates' Telegram API call (as a dictionary), which is
@@ -190,6 +190,24 @@ def getUpdates(): # Returns a JSON object representing the events that occur dur
         None
     """
     global update_counter
+    def getUpdatesWithOffset(offset=None):
+        """
+        Desc:
+            Does the same as getUpdates()except with an offset, which means that it removes
+            the old updates from the JSON object so that the limit (100) is not exceeded.
+        Takes:
+            int offset (optional, default: None)   : The offset for the API call, meaning the last update id that will be saved
+        Returns:
+            dict js : The JSON object representing the events that occur during interaction with the bot
+        Note:
+            Is not designed to work with other functions.
+        Raises:
+            None
+        """
+        url = URL + "getUpdates?timeout=100&alllowed_updates=['message']&offset={}".format(offset)
+        js = jsonFromUrl(url)
+        return js
+
     url = URL + "getUpdates?timeout=100&alllowed_updates=['message']"
     if update_counter > 90:
         update_counter = 0
@@ -198,26 +216,7 @@ def getUpdates(): # Returns a JSON object representing the events that occur dur
     update_counter += 1
     return js
 
-
-def getUpdatesWithOffset(offset=None):
-    """
-    Desc:
-        Does the same as getUpdates()except with an offset, which means that it removes
-        the old updates from the JSON object so that the limit (100) is not exceeded.
-    Takes:
-        int offset (optional, default: None)   : The offset for the API call, meaning the last update id that will be saved
-    Returns:
-        dict js : The JSON object representing the events that occur during interaction with the bot
-    Note:
-        None
-    Raises:
-        None
-    """
-    url = URL + "getUpdates?timeout=100&alllowed_updates=['message']&offset={}".format(offset)
-    js = jsonFromUrl(url)
-    return js
-
-
+    
 def lastChatIdText(updates): 
     """
     Desc:
@@ -266,7 +265,6 @@ def lastSenderId(update):
     if update['message']['chat']['type'] == 'private':
         return update['message']['from']['id']
 
-
 def sendMessage(text, chat_id): 
     """
     Desc:
@@ -285,7 +283,6 @@ def sendMessage(text, chat_id):
     url = URL + "sendMessage?text={}&chat_id={}".format(text, chat_id)
     print('Lähetin viestin: {} {}:lle'.format(text, chat_id))
     getUrl(url)
-
 
 def getLastUpdateId(updates):
     """
@@ -328,7 +325,6 @@ def getLastUpdate(updates):
         if i['update_id'] == max(update_ids):
             return i
 
-
 def getFile(file_id, path):
     """
     Desc:
@@ -346,7 +342,6 @@ def getFile(file_id, path):
     json = jsonFromUrl(URL + 'getFile?file_id={}'.format(file_id))
     url = 'https://api.telegram.org/file/bot{}/{}'.format(telegram_bot_token, json['result']['file_path'])
     downloadUrl(url, path)
-
 
 def getFileId(resolution): 
     """
@@ -384,8 +379,7 @@ def getFileId(resolution):
             if i['file_size'] == greatest:
                  return i['file_id']
 
-
-def getMessageType(dictionary): # Returns the type of the last message sent.
+def getMessageType(dictionary): 
     """
     Desc:
         gets the type of the last message sent.
@@ -405,7 +399,21 @@ def getMessageType(dictionary): # Returns the type of the last message sent.
     elif 'text' in dictionary:
         return 'text'
 
-def sendImage(chat_id, path, caption=''): # Sends an image to the chat_id provided. Path is the location that the image is going to uploaded from. Caption is optional.
+def sendImage(chat_id, path, caption=''): 
+    """
+    Desc:
+        Sends an image to a user.
+    Takes:
+        str chat_id : The chat id that the message sent to.
+        str path : The local path containing the image to be sent.
+        str caption : (optional) Caption sent along the image
+     Returns:
+        None
+    Note:
+        If path not found, sends a message to the user saying that they haven't told the homework .
+    Raises:
+        None
+    """
     try:
         lxybot.send_photo(chat_id=chat_id, photo=open(path, 'rb'), caption=caption)
     except FileNotFoundError:
@@ -414,7 +422,19 @@ def sendImage(chat_id, path, caption=''): # Sends an image to the chat_id provid
         kouluaine = kouluaine.split('.')[0]
         sendMessage('Et ole kertonut minulle aineen {} läksyjä!'.format(kouluaine.lower()), lastSenderId(getLastUpdate(getUpdates())))
     
-def getChatTitle(update): # Gets the last message sender, or the group name, depending whether the last message was sent in a group or a private conversation.
+def getChatTitle(update): 
+    """
+    Desc:
+        returns the chat title pf the last message sent.
+    Takes:
+        JSON update : A JSON object of the same form as that is returned from the getUpdates() function.
+    Returns:
+        str : chat title of the conversation that the last message was sent from.
+    Note:
+        None
+    Raises:
+        Exception('chatin titleä ei löytynyt') : If no chat title is not found.
+    """
     if update['chat']['type'] == 'group':
         return update['chat']['title']
     elif update['chat']['type'] == 'private':
@@ -422,12 +442,9 @@ def getChatTitle(update): # Gets the last message sender, or the group name, dep
     else:
         raise Exception('chatin titleä ei löytynyt')
     
-    
-    
-
 def main():
-    last_message_before = None
-    while True:
+    last_message_before = None #Initializing a variable before the main loop.
+    while True: # The super-duper-hyper-ultra-extra master champion aka main loop
         last_message = getLastUpdate(getUpdates()) # The last "message" value in the getUpdates JSON object.
         try:
             last_message_type = getMessageType(last_message['message'])
@@ -491,9 +508,7 @@ def main():
                 print('\nKuva ladattu onnistuneesti')
                 
         last_message_before = last_message
-    last_message_before = last_message
-    
-
+    last_message_before = last_message # Updating the last_message_before var.
     
 if __name__ == '__main__': # If a foreign script calls this file, it still works.
     main()
