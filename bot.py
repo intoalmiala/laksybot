@@ -452,8 +452,11 @@ def main():
             except:
                 raise Exception('Not a message.')
 
-        if last_message != last_message_before: # All this happens if somethig new has happened since last update.
-            chat_id = lastChatIdText(getUpdates())[1]
+        if last_message != last_message_before: # All this happens if somethig new has happened since last update.  
+            if getMessageType(last_message['message']) != 'photo':
+                chat_id = lastChatIdText(getUpdates())[1]
+            else:
+                continue
             last_title = getChatTitle(last_message_content)
             print('Uusi viesti')
             try:
