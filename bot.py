@@ -14,7 +14,11 @@ watson_v_r_token = ''
 watson_nlc_password = ''
 watson_nlc_username = ''
 watson_nlc_id = ''
-
+telegram_bot_token= '386957960:AAEWqf1iFMjnHk7yJfqK9pHVuWiTaxQpJ1I'
+watson_v_r_token = 'd51997e99c32eeea53de579fa1337829f6c1c3b8'
+watson_nlc_password = 'mawh434bmDVG'
+watson_nlc_username = '5b314083-6286-4ad6-86b0-c6d0ea4aa266'
+watson_nlc_id = 'c533b1x244-nlc-15670'
 
 
 
@@ -114,7 +118,7 @@ def watson(text): #This function determines, which school subject is being talke
     response = natural_language_classifier.classify(watson_nlc_id, text)
     top_class = response['top_class']
     print(getTopClassConfidence(top_class, response))
-    if getTopClassConfidence(top_class, response) <= 0.45:
+    if top_class == 'keskustelu':
         return None
     else:
         return top_class
