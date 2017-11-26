@@ -14,7 +14,11 @@ watson_v_r_token = ''
 watson_nlc_password = ''
 watson_nlc_username = ''
 watson_nlc_id = ''
-
+telegram_bot_token = '386957960:AAEWqf1iFMjnHk7yJfqK9pHVuWiTaxQpJ1I'
+watson_vr_token = 'd51997e99c32eeea53de579fa1337829f6c1c3b8'
+watson_nlc_password = 'mawh434bmDVG'
+watson_nlc_username= '5b314083-6286-4ad6-86b0-c6d0ea4aa266'
+watson_nlc_id = 'c53147x243-nlc-6298'
 
 lxybot = telegram.Bot(telegram_bot_token) # initializing a telegram bot instance.
 URL = "https://api.telegram.org/bot{}/".format(telegram_bot_token) # the base URL of the bot api.
@@ -407,7 +411,10 @@ def main():
             last_message_type, last_message_content = getMessageStuff(last_message)
             last_update_id = getLastUpdateId(updates) + 1
             if getMessageType(last_message['message']) != 'photo':
-                chat_id = lastChatIdText(updates)[1]
+                try:
+                    chat_id = lastChatIdText(updates)[1]
+                except Exception:
+                    return
             else:
                 continue
             last_title = getChatTitle(last_message_content)
