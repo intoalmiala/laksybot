@@ -405,7 +405,7 @@ def main():
             last_message = getLastUpdate(updates) # The last "message" value in the getUpdates JSON object.
             last_message_type, last_message_content = getMessageStuff(last_message)
             last_update_id = getLastUpdateId(updates) + 1
-            if getMessageType(last_message['message']) != 'photo':
+            if last_message_type != 'photo':
                 try:
                     chat_id = lastChatIdText(updates)[1]
                 except Exception:
