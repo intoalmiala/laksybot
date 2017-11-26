@@ -414,7 +414,7 @@ def main():
                 try:
                     chat_id = lastChatIdText(updates)[1]
                 except Exception:
-                    return
+                    continue
             else:
                 continue
             last_title = getChatTitle(last_message_content)
