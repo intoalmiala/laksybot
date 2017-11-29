@@ -332,7 +332,7 @@ def getMessageType(dictionary):
     Raises:
         None
     """
-    if 'caption' in dictionary:
+    if 'caption' in dictionary and 'photo' in dictionary:
         return 'caption'
     elif 'photo' in dictionary:
         return 'photo'
