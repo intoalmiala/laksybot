@@ -14,6 +14,13 @@ watson_v_r_token = ''
 watson_nlc_password = ''
 watson_nlc_username = ''
 watson_nlc_id = ''
+telegram_bot_token= '386957960:AAEWqf1iFMjnHk7yJfqK9pHVuWiTaxQpJ1I'
+watson_v_r_token = 'd51997e99c32eeea53de579fa1337829f6c1c3b8'
+watson_nlc_password = 'mawh434bmDVG'
+watson_nlc_username = '5b314083-6286-4ad6-86b0-c6d0ea4aa266'
+watson_nlc_id = 'c533b1x244-nlc-15670'
+
+
 
 lxybot = telegram.Bot(telegram_bot_token) # initializing a telegram bot instance.
 URL = "https://api.telegram.org/bot{}/".format(telegram_bot_token) # the base URL of the bot api.
@@ -164,7 +171,7 @@ def jsonFromUrl(url):
         None
     """
     content = getUrl(url)
-    js = json.loads(content)
+    js = json.loads(str(content))
     return js
 
 
@@ -419,11 +426,11 @@ def main():
             elif last_message_type == 'caption':
                 parsed_text = watson(last_message_content['caption'])
             try:
-                print('Lähettäjä: {}; Viesti: {}; chat_id: {}'.format(last_title, last_message_content['caption'], chat_id))
+                print('Lähettäjä: {}; chat_id: {}'.format(last_title, chat_id))
                 print(parsed_text)
             except:
                 try:
-                    print('Lähettäjä: {}; Viesti: {}; chat_id: {}'.format(last_title, last_message_content['text'], chat_id))
+                    print('Lähettäjä: {}; chat_id: {}'.format(last_title, chat_id))
                     print(parsed_text)
                 except:
                     print('virhe')
