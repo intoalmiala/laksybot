@@ -1,0 +1,25 @@
+curl -i --user "bc765b4b-3a4c-401b-a2ba-5208d43ec966":"P1owFTkKo2p3" -F training_data=@{path_to_file}/weather_data_train.csv -F training_metadata="{\"language\":\"en\",\"name\":\"TutorialClassifier\"}" "https://gateway.watsonplatform.net/natural-language-classifier/api/v1/classifiers"
+{
+  "natural_language_classifier": [
+    {
+      "name": "lxybot-natural-la-1516887442907",
+      "plan": "standard",
+      "credentials": {
+        "url": "https://gateway.watsonplatform.net/natural-language-classifier/api",
+        "username": "bc765b4b-3a4c-401b-a2ba-5208d43ec966",
+        "password": "P1owFTkKo2p3"
+      }
+    }
+  ],
+  "watson_vision_combined": [
+    {
+      "name": "lxybot-watson-vis-1516887442904",
+      "plan": "free",
+      "credentials": {
+        "url": "https://gateway-a.watsonplatform.net/visual-recognition/api",
+        "note": "It may take up to 5 minutes for this key to become active",
+        "api_key": "2d5745cf5705f78b39d20caf065d6aa840a9c3e0"
+      }
+    }
+  ]
+}
