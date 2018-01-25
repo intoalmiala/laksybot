@@ -74,7 +74,7 @@ def visual_recognition(path):
             #print(response[1]['class'])
             return response[1]['class']
     visual_recognition = VisualRecognitionV3('2016-05-20', api_key=watson_v_r_token)
-    response = visual_recognition.classify(images_file=open(path, 'rb'), threshold=0, classifier_ids=['liitutauluvaiei_1285787542'])
+    response = visual_recognition.classify(images_file=open(path, 'rb'), threshold=0, classifier_ids=['Liitutauluvaiei_518054255'])
     thingy = getHighestClass(response)
     return thingy
 
