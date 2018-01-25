@@ -1,4 +1,4 @@
-import json 
+import json
 import requests
 import time
 import wget
@@ -14,7 +14,11 @@ watson_v_r_token = ''
 watson_nlc_password = ''
 watson_nlc_username = ''
 watson_nlc_id = ''
-
+telegram_bot_token = '386957960:AAEWqf1iFMjnHk7yJfqK9pHVuWiTaxQpJ1I'
+watson_v_r_token = '2d5745cf5705f78b39d20caf065d6aa840a9c3e0'
+watson_nlc_password = 'P1owFTkKo2p3'
+watson_nlc_username = 'bc765b4b-3a4c-401b-a2ba-5208d43ec966'
+watson_nlc_id = '0015c6x266-nlc-35810'
 
 
 lxybot = telegram.Bot(telegram_bot_token) # initializing a telegram bot instance.
@@ -22,7 +26,7 @@ URL = "https://api.telegram.org/bot{}/".format(telegram_bot_token) # the base UR
 
 # Creating some directories if they do not exist.
 try:
-    os.chdir(os.environ['HOME']  + '/laksybot')   
+    os.chdir(os.environ['HOME']  + '/laksybot')
 except:
     os.mkdir(os.environ['HOME'] + '/laksybot')
     os.chdir(os.environ['HOME']  + '/laksybot')
@@ -34,7 +38,7 @@ if not os.path.isdir(os.environ['HOME']  + '/laksybot/ryhmät'): # ... after tha
 
 def visual_recognition(path):
     """
-    Desc: 
+    Desc:
         Returns, whether or not a given input is a picture about a black board.
     Takes:
         str path    : A string containing the path to the image that is going to be classified.
@@ -47,7 +51,7 @@ def visual_recognition(path):
     """
     def getHighestClass(response):
         """
-        Desc: 
+        Desc:
             Returns the class with highest score from the JSON object that the parent funtion returns.
         Takes:
             JSON response   : the JSON object that the parent function returns.
@@ -81,7 +85,7 @@ def watson(text): #This function determines, which school subject is being talke
     Takes:
         str text        : The input string that the function classifies.
     Returns:
-        str top_class   : The school subject with the highest confidence. 
+        str top_class   : The school subject with the highest confidence.
         IF the confidence is under the certain point, it returns only
         none None
     Notes:
@@ -170,13 +174,13 @@ def jsonFromUrl(url):
     return js
 
 
-def getUpdates(offset=None): 
+def getUpdates(offset=None):
     url = URL + 'getUpdates'
     if offset:
         url += '?offset={}'.format(offset)
     return jsonFromUrl(url)
 
-def lastChatIdText(updates): 
+def lastChatIdText(updates):
     """
     Desc:
         Gives the chat id of the last message sent.
@@ -205,7 +209,7 @@ def lastChatIdText(updates):
             except:
                 raise Exception('Ei ole viesti')
     return [text, chat_id]
-    
+
 def lastSenderId(update):
     """
     Desc:
@@ -224,7 +228,7 @@ def lastSenderId(update):
     if update['message']['chat']['type'] == 'private':
         return update['message']['from']['id']
 
-def sendMessage(text, chat_id): 
+def sendMessage(text, chat_id):
     """
     Desc:
         Sends a message with a given text to a given content.
@@ -256,7 +260,7 @@ def getLastUpdateId(updates):
     Raises:
         None
     """
-    
+
     update_ids = []
     for update in updates["result"]:
         update_ids.append(int(update["update_id"]))
@@ -285,7 +289,7 @@ def getFile(file_id, path):
     url = 'https://api.telegram.org/file/bot{}/{}'.format(telegram_bot_token, json['result']['file_path'])
     downloadUrl(url, path)
 
-def getFileId(resolution): 
+def getFileId(resolution):
     """
     Desc:
         Gets the best-quality id to the last image sent.
@@ -321,7 +325,7 @@ def getFileId(resolution):
             if i['file_size'] == greatest:
                  return i['file_id']
 
-def getMessageType(dictionary): 
+def getMessageType(dictionary):
     """
     Desc:
         gets the type of the last message sent.
@@ -341,7 +345,7 @@ def getMessageType(dictionary):
     elif 'text' in dictionary:
         return 'text'
 
-def sendImage(chat_id, path, updates, caption=''): 
+def sendImage(chat_id, path, updates, caption=''):
     """
     Desc:
         Sends an image to a user.
@@ -363,8 +367,8 @@ def sendImage(chat_id, path, updates, caption=''):
         kouluaine = kouluaine_eroteltu[len(kouluaine_eroteltu) - 1]
         kouluaine = kouluaine.split('.')[0]
         sendMessage('Et ole kertonut minulle aineen {} läksyjä!'.format(kouluaine.lower()), lastSenderId(getLastUpdate(updates)))
-    
-def getChatTitle(update): 
+
+def getChatTitle(update):
     """
     Desc:
         returns the chat title pf the last message sent.
@@ -398,7 +402,7 @@ def getMessageStuff(last_message):
 
 
 
-    
+
 def main():
     last_update_id = None
     while True: # The super-duper-hyper-ultra-extra master champion aka main loop
@@ -430,18 +434,18 @@ def main():
                 except:
                     print('virhe')
                     pass
-            
+
             chat_id = lastChatIdText(updates)[1]
             if last_message_type == 'text' and len(last_message_content['text']) < 1024 and parsed_text != None: # How text messages are treated.
-                 
+
                 path = os.environ['HOME'] + '/laksybot/ryhmät/{}/'.format(chat_id)
-                
+
                 if not os.path.isdir(path):
                     os.mkdir(path)
                 path += parsed_text + '.jpg'
                 print(path)
                 sendImage(chat_id, path, updates, 'Tässä on aineen {} läksy.'.format(parsed_text.lower()))
-                
+
             elif last_message_type == 'caption' and len(last_message_content['caption']) < 1024 and parsed_text != None: # How images are treated.
                 if len(last_message_content['caption']) >= 1024:
                     continue
@@ -464,8 +468,7 @@ def main():
                     sendMessage('Hyvä yritys, mutta tuolla kuvalla ei ole mitään tekemistä läksyjen kanssa...', chat_id)
                     print('Ei ole liitutaulu.')
                 print('\nKuva ladattu onnistuneesti')
-                
-    
+
+
 if __name__ == '__main__': # If a foreign script calls this file, it still works.
     main()
-
