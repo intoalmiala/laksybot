@@ -68,10 +68,10 @@ def visual_recognition(path):
             classes.append(i['class'])
             scores.append(i['score'])
         if response[0]['score'] > response[1]['score']:
-            #print(response[0]['class'])
+            print(response[0]['class'])
             return response[0]['class']
         else:
-            #print(response[1]['class'])
+            print(response[1]['class'])
             return response[1]['class']
     visual_recognition = VisualRecognitionV3('2016-05-20', api_key=watson_v_r_token)
     response = visual_recognition.classify(images_file=open(path, 'rb'), threshold=0, classifier_ids=['Liitutauluvaiei_518054255'])
@@ -459,7 +459,7 @@ def main():
                     os.remove('./temp/{}/{}.jpg'.format(chat_id, parsed_text))
                 getFile(getFileId(1), 'temp/{}/{}.jpg'.format(chat_id, parsed_text))
                 print(visual_recognition('./temp/{}/{}.jpg'.format(chat_id, parsed_text)))
-                if visual_recognition('./temp/{}/{}.jpg'.format(chat_id, parsed_text)) == 'liitutaulu':
+                if visual_recognition('./temp/{}/{}.jpg'.format(chat_id, parsed_text)) == 'Liitutaulu':
                     if os.path.isfile('./ryhmät/{}/{}.jpg'.format(chat_id, parsed_text)):
                         os.remove('./ryhmät/{}/{}.jpg'.format(chat_id, parsed_text))
                     os.rename('./temp/{}/{}.jpg'.format(chat_id, parsed_text), './ryhmät/{}/{}.jpg'.format(chat_id, parsed_text))
