@@ -14,11 +14,7 @@ watson_v_r_token = ''
 watson_nlc_password = ''
 watson_nlc_username = ''
 watson_nlc_id = ''
-telegram_bot_token = '386957960:AAEWqf1iFMjnHk7yJfqK9pHVuWiTaxQpJ1I'
-watson_v_r_token = '2d5745cf5705f78b39d20caf065d6aa840a9c3e0'
-watson_nlc_password = 'P1owFTkKo2p3'
-watson_nlc_username = 'bc765b4b-3a4c-401b-a2ba-5208d43ec966'
-watson_nlc_id = '0015c6x266-nlc-35810'
+
 
 
 lxybot = telegram.Bot(telegram_bot_token) # initializing a telegram bot instance.
